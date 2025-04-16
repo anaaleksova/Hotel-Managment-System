@@ -28,4 +28,13 @@ public class RoomAvailability {
     @Column(name = "status", length = 20)
     private String status;
 
+    public RoomAvailability(Room room, LocalDate date_from, LocalDate date_to) {
+        this.room = room;
+        this.date_from = date_from;
+        this.date_to = date_to;
+    }
+
+    public RoomAvailability() {
+
+    }
 }

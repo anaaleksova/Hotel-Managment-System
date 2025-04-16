@@ -30,7 +30,5 @@ public class LoyaltyLevel {
     @Column(name = "discount_percent", precision = 5, scale = 2)
     private BigDecimal discountPercent;
 
-    @Column(name = "benefits", length = Integer.MAX_VALUE)
-    private String benefits;
 
 }

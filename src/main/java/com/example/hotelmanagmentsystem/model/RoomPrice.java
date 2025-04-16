@@ -23,7 +23,5 @@ public class RoomPrice {
     @JoinColumn(name = "price_list_id", nullable = false)
     private PriceList priceList;
 
-    @Column(name = "price", precision = 10, scale = 2)
-    private BigDecimal price;
 
 }

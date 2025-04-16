@@ -14,7 +14,7 @@ import java.time.LocalDate;
 public class Reservation {
     @Id
     @Column(name = "reservation_id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @Column(name = "check_in", nullable = false)
     private LocalDate checkIn;

@@ -30,18 +30,6 @@ public class Guest {
     @Column(name = "address", length = Integer.MAX_VALUE)
     private String address;
 
-    @Column(name = "id_type", length = 20)
-    private String idType;
-
-    @Column(name = "id_number", length = 50)
-    private String idNumber;
-
-    @Column(name = "nationality", length = 50)
-    private String nationality;
-
-    @Column(name = "birthdate")
-    private LocalDate birthdate;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;

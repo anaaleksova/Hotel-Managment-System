@@ -123,7 +123,7 @@
           </div>
           <div class="card-footer d-flex justify-content-between align-items-center">
             <div class="price-tag">$<span th:text="${#numbers.formatDecimal(room.price, 0, 2)}"></span> <small class="text-muted">per night</small></div>
-            <a href="#" class="btn btn-primary">Book Now</a>
+            <a th:href="@{/reservations/create(roomId=${room.roomId},checkInDate=${searchDto.dateFrom},checkOutDate=${searchDto.dateTo})}" class="btn btn-primary">Book Now</a>
           </div>
         </div>
       </div>

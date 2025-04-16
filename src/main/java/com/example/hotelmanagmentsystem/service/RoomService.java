@@ -88,4 +88,91 @@ public class RoomService {
 
         return result;
     }
+
+    public Room getRoom(Long roomId) {
+        return roomRepository.findById(roomId).orElseThrow();
+    }
+
+    public AvailableRoomDto getRoomDetails(Long roomId) {
+        Optional<Room> roomOpt = roomRepository.findById(roomId);
+        if (!roomOpt.isPresent()) {
+            return null;
+        }
+
+        Room room = roomOpt.get();
+        RoomType roomType = roomTypeRepository.findById(room.getRoomTypeId()).orElse(null);
+        RoomPositionType positionType = roomPositionTypeRepository.findById(room.getPositionTypeId()).orElse(null);
+
+        if (roomType == null || positionType == null) {
+            return null;
+        }
+
+        // Find pricing for the current season
+        Optional<RoomPrice> roomPriceOpt = findRoomPriceForDates(roomId, LocalDate.now());
+        if (!roomPriceOpt.isPresent()) {
+            return null;
+        }
+
+        RoomPrice roomPrice = roomPriceOpt.get();
+        PriceList priceList = roomPrice.getPriceList();
+
+        AvailableRoomDto dto = new AvailableRoomDto();
+        dto.setRoomId(room.getId());
+        dto.setRoomNumber(room.getRoomNumber());
+        dto.setRoomTypeName(roomType.getName());
+        dto.setRoomPositionName(positionType.getName());
+        dto.setPrice(priceList.getPrice());
+        dto.setAmenities(room.getAmenities());
+        dto.setCapacity(room.getCapacity());
+        dto.setFloor(room.getFloor());
+
+        return dto;
+    }
+
+    /**
+     * Find a RoomPrice entry for a room and date
+     */
+    public RoomPrice findRoomPrice(Long roomId, LocalDate date) {
+        Optional<RoomPrice> roomPriceOpt = findRoomPriceForDates(roomId, date);
+        return roomPriceOpt.orElse(null);
+    }
+
+    /**
+     * Helper method to find a RoomPrice for a specific room and date
+     */
+    private Optional<RoomPrice> findRoomPriceForDates(Long roomId, LocalDate date) {
+        // Find the season for the date
+        Season season = seasonRepository.findByDate(date);
+        if (season == null) {
+            return Optional.empty();
+        }
+
+        // Get the room
+        Optional<Room> roomOpt = roomRepository.findById(roomId);
+        if (!roomOpt.isPresent()) {
+            return Optional.empty();
+        }
+
+        Room room = roomOpt.get();
+        RoomType roomType = roomTypeRepository.findById(room.getRoomTypeId()).orElse(null);
+        RoomPositionType positionType =  roomPositionTypeRepository.findById(room.getPositionTypeId()).orElse(null);
+
+        if (roomType == null || positionType == null) {
+            return Optional.empty();
+        }
+
+        // Find a matching price list
+        PriceList priceList = priceListRepository.findByRoomTypeAndPositionTypeAndSeason(
+                roomType.getId(),
+                positionType.getId(),
+                season.getId()
+        );
+
+        if (priceList == null) {
+            return Optional.empty();
+        }
+
+        // Find the RoomPrice entry
+        return roomPriceRepository.findByRoomIdAndPriceListId(roomId, priceList.getId());
+    }
 }
