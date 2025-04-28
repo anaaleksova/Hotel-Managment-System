@@ -93,29 +93,44 @@ public class RoomService {
         return roomRepository.findById(roomId).orElseThrow();
     }
 
-    public AvailableRoomDto getRoomDetails(Long roomId) {
+    public AvailableRoomDto getRoomDetails(Long roomId, LocalDate checkInDate) {
+        // Step 1: Find the room
         Optional<Room> roomOpt = roomRepository.findById(roomId);
-        if (!roomOpt.isPresent()) {
+        if (roomOpt.isEmpty()) {
             return null;
         }
 
         Room room = roomOpt.get();
-        RoomType roomType = roomTypeRepository.findById(room.getRoomTypeId()).orElse(null);
-        RoomPositionType positionType = roomPositionTypeRepository.findById(room.getPositionTypeId()).orElse(null);
 
-        if (roomType == null || positionType == null) {
+        // Step 2: Find room type and position
+        Optional<RoomType> roomTypeOpt = roomTypeRepository.findById(room.getRoomTypeId());
+        Optional<RoomPositionType> positionTypeOpt = roomPositionTypeRepository.findById(room.getPositionTypeId());
+
+        if (roomTypeOpt.isEmpty() || positionTypeOpt.isEmpty()) {
             return null;
         }
 
-        // Find pricing for the current season
-        Optional<RoomPrice> roomPriceOpt = findRoomPriceForDates(roomId, LocalDate.now());
-        if (!roomPriceOpt.isPresent()) {
+        RoomType roomType = roomTypeOpt.get();
+        RoomPositionType positionType = positionTypeOpt.get();
+
+        // Step 3: Find the season for the CHECK-IN DATE (not today's date)
+        Season season = seasonRepository.findByDate(checkInDate);
+        if (season == null) {
             return null;
         }
 
-        RoomPrice roomPrice = roomPriceOpt.get();
-        PriceList priceList = roomPrice.getPriceList();
+        // Step 4: Find the price list for this combination
+        PriceList priceList = priceListRepository.findByRoomTypeAndPositionTypeAndSeason(
+                roomType.getId(),
+                positionType.getId(),
+                season.getId()
+        );
 
+        if (priceList == null) {
+            return null;
+        }
+
+        // Step 5: Create and return the DTO
         AvailableRoomDto dto = new AvailableRoomDto();
         dto.setRoomId(room.getId());
         dto.setRoomNumber(room.getRoomNumber());

@@ -43,7 +43,7 @@ public class ReservationController {
 
         try {
             // Get room details
-            AvailableRoomDto room = roomService.getRoomDetails(roomId);
+            AvailableRoomDto room = roomService.getRoomDetails(roomId,checkInDate);
 
             if (room == null) {
                 return "redirect:/room-search?error=Room not found";

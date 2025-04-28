@@ -23,7 +23,7 @@ public class RoomController {
     /**
      * Display the room search page
      */
-    @GetMapping("/room-search")
+    @GetMapping({"/room-search","/"})
     public String showRoomSearchPage(Model model) {
         // Initialize search form with default values (today and tomorrow)
         RoomSearchDto searchDto = new RoomSearchDto();
