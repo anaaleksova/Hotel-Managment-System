@@ -1,15 +1,19 @@
 package com.example.hotelmanagmentsystem.web;
 
 import com.example.hotelmanagmentsystem.dto.AvailableRoomDto;
-import com.example.hotelmanagmentsystem.model.Guest;
-import com.example.hotelmanagmentsystem.model.Reservation;
-import com.example.hotelmanagmentsystem.model.Room;
-import com.example.hotelmanagmentsystem.model.RoomPrice;
+import com.example.hotelmanagmentsystem.model.*;
 import com.example.hotelmanagmentsystem.service.GuestService;
 import com.example.hotelmanagmentsystem.service.ReservationService;
 import com.example.hotelmanagmentsystem.service.RoomService;
+import com.example.hotelmanagmentsystem.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Controller
 @RequestMapping("/reservations")
@@ -30,6 +35,8 @@ public class ReservationController {
 
     @Autowired
     private GuestService guestService;
+    @Autowired
+    private UserService userService;
 
     /**
      * Show the reservation form with room details
@@ -39,7 +46,8 @@ public class ReservationController {
             @RequestParam Long roomId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkInDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkOutDate,
-            Model model) {
+            Model model,
+            HttpSession session) {
 
         try {
             // Get room details
@@ -48,7 +56,9 @@ public class ReservationController {
             if (room == null) {
                 return "redirect:/room-search?error=Room not found";
             }
-
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+            User loggedUser = userDetails.getUser();
             // Calculate number of nights
             long nights = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
 
@@ -57,6 +67,7 @@ public class ReservationController {
             model.addAttribute("checkInDate", checkInDate);
             model.addAttribute("checkOutDate", checkOutDate);
             model.addAttribute("nights", nights);
+            model.addAttribute("loggedUser",loggedUser);
 
             return "reservation-form";
         } catch (Exception e) {
@@ -136,4 +147,46 @@ public class ReservationController {
             return "redirect:/room-search";
         }
     }
+    private boolean isStaff(HttpSession session) {
+        User loggedUser = (User) session.getAttribute("loggedUser");
+        return loggedUser != null && "STAFF".equals(loggedUser.getUserType());
+    }
+//    @GetMapping("/")
+//    public String roomManagement(Model model, HttpSession session) {
+//        // Check if user is staff
+//        if (!isStaff(session)) {
+//            return "redirect:/";
+//        }
+//
+//        // Get all rooms for staff view (unfiltered)
+//        List<Room> allRooms = roomService.getAllRooms();
+//        model.addAttribute("allRooms", allRooms);
+//
+//        // Add the logged user to the model
+//        model.addAttribute("loggedUser", session.getAttribute("loggedUser"));
+//
+//        return "room-search";
+//    }
+    // View reservation details
+//    @GetMapping("/reservations/view/{id}")
+//    public String viewReservation(@PathVariable Long id, Model model, HttpSession session) {
+//        // Staff can view any reservation, guests can only view their own
+//        User loggedUser = (User) session.getAttribute("loggedUser");
+//        if (loggedUser == null) {
+//            return "redirect:/login";
+//        }
+//
+//        Reservation reservation = reservationService.getReservationById(id);
+//
+//        // If not staff, check if reservation belongs to user
+//        if (!"STAFF".equals(loggedUser.getUserType()) &&
+//                !reservation.getGuest().getId().equals(loggedUser.getId())) {
+//            return "redirect:/";
+//        }
+//
+//        model.addAttribute("reservation", reservation);
+//        model.addAttribute("loggedUser", loggedUser);
+//
+//        return "reservation-detail";
+//    }
 }

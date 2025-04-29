@@ -21,13 +21,13 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     @Query("""
         SELECT r FROM Room r
         WHERE r.id NOT IN (
-            SELECT ra.id FROM RoomAvailability ra
+            SELECT ra.room.id FROM RoomAvailability ra
             WHERE ra.status = 'booked'
             AND ra.date_from <= :dateTo
             AND ra.date_to >= :dateFrom
         )
         AND r.id NOT IN (
-            SELECT res.id FROM Reservation res
+            SELECT res.room.id FROM Reservation res
             WHERE res.status = 'Confirmed'
             AND res.checkIn <= :dateTo
             AND res.checkOut >= :dateFrom
@@ -37,4 +37,5 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             @Param("dateFrom") LocalDate dateFrom,
             @Param("dateTo") LocalDate dateTo
     );
+
 }

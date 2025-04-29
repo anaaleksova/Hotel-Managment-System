@@ -6,6 +6,9 @@ import com.example.hotelmanagmentsystem.repository.ReservationRepository;
 import com.example.hotelmanagmentsystem.repository.RoomAvailabilityRepository;
 import com.example.hotelmanagmentsystem.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -104,4 +107,9 @@ public class ReservationService {
     public List<Reservation> getReservationsByGuestId(Integer guestId) {
         return reservationRepository.findByGuestId(guestId);
     }
+
+    public Reservation getReservationById(Long id) {
+        return reservationRepository.findById(id);
+    }
+
 }

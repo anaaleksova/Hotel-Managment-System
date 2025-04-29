@@ -10,13 +10,13 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(name = "role")
-public class Role {
+@Table(name = "group_table")
+public class Group {
     @Id
-    @Column(name = "role_id", nullable = false)
+    @Column(name = "group_id", nullable = false)
     private Integer id;
 
-    @Column(name = "name", nullable = false, length = 50)
+    @Column(name = "name", nullable = false, length = 100)
     private String name;
 
     @Column(name = "description", length = Integer.MAX_VALUE)
@@ -24,8 +24,8 @@ public class Role {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "Role_Permission",
-            joinColumns = @JoinColumn(name = "role_id"),
+            name = "Group_Permission",
+            joinColumns = @JoinColumn(name = "group_id"),
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
     private Set<Permission> permissions = new HashSet<>();
@@ -42,6 +42,5 @@ public class Role {
     public void addPermission(Permission permission) {
         this.permissions.add(permission);
     }
-
 
 }

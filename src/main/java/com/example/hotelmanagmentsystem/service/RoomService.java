@@ -190,4 +190,27 @@ public class RoomService {
         // Find the RoomPrice entry
         return roomPriceRepository.findByRoomIdAndPriceListId(roomId, priceList.getId());
     }
+
+    public List<Room> getAllRooms() {
+        return roomRepository.findAll();
+    }
+
+    public void saveRoom(Room room) {
+
+    }
+
+    public Room getRoomById(Long id) {
+        return roomRepository.findById(id).orElseThrow();
+    }
+
+    public void deleteRoom(Long id) {
+        roomRepository.delete(roomRepository.findById(id).orElseThrow());
+    }
+
+    public List<RoomType> getAllRoomTypes() {
+        return roomTypeRepository.findAll();
+    }
+    public List<RoomPositionType> getAllRoomPositions() {
+        return roomPositionTypeRepository.findAll();
+    }
 }

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grand Hotel - Staff Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        /* Staff view styles */
+        .staff-header {
+            background-color: #1a3c5e;
+            color: white;
+            padding: 1.5rem 0;
+        }
+        .admin-nav {
+            background-color: #f8f9fa;
+            padding: 10px 0;
+            margin-bottom: 20px;
+        }
+        .admin-nav .nav-link {
+            color: #1a3c5e;
+            font-weight: 500;
+        }
+        .admin-nav .nav-link.active {
+            background-color: #1a3c5e;
+            color: white;
+        }
+        .action-buttons .btn {
+            margin-right: 5px;
+        }
+        .table-action-btn {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 3px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header for Staff -->
+<header class="staff-header mb-2">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>Grand Hotel - Staff Portal</h1>
+            <div>
+                <span class="me-3">Welcome, <span th:text="${loggedUser.username}"></span></span>
+                <a href="/logout" class="btn btn-outline-light btn-sm">Logout</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Staff Navigation -->
+<div class="admin-nav">
+    <div class="container">
+        <ul class="nav nav-pills">
+            <li class="nav-item">
+                <a class="nav-link active" href="/room-management">Room Management</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/reservations-management">Reservations</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Room Management View -->
+    <div id="rooms-management" class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Room Management</h2>
+            <a href="/rooms/add" class="btn btn-success">
+                <i class="bi bi-plus-lg"></i> Add New Room
+            </a>
+        </div>
+
+        <!-- Success message -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Room Table -->
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead style="background: #1a3c5e;color: white">
+                <tr>
+                    <th>Room #</th>
+                    <th>Floor</th>
+                    <th>Type</th>
+                    <th>Position</th>
+                    <th>Capacity</th>
+<!--                    <th>Price per Night</th>-->
+                    <th>Amenities</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="room : ${allRooms}">
+                    <td th:text="${room.roomNumber}"></td>
+                    <td th:text="${room.floor}"></td>
+                    <td th:text="${room.roomTypeId}"></td>
+                    <td th:text="${room.positionTypeId}"></td>
+                    <td th:text="${room.capacity}"></td>
+<!--                    <td>$<span th:text="${#numbers.formatDecimal(room.price, 0, 2)}"></span></td>-->
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip"
+                                th:title="${room.amenities}">
+                            View Amenities
+                        </button>
+                    </td>
+                    <td class="action-buttons">
+                        <a th:href="@{/rooms/edit/{id}(id=${room.id})}" class="btn btn-warning table-action-btn"
+                           data-bs-toggle="tooltip" title="Edit Room">
+                            <i class="bi bi-pencil-fill"></i>
+                        </a>
+                        <a th:href="@{/rooms/delete/{id}(id=${room.id})}"
+                           class="btn btn-danger table-action-btn"
+                           data-bs-toggle="tooltip" title="Delete Room"
+                           onclick="return confirm('Are you sure you want to delete this room?')">
+                            <i class="bi bi-trash-fill"></i>
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-4 mt-5">
+    <div class="container text-center">
+        <p>&copy; 2025 Grand Hotel. All rights reserved.</p>
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,6 +1,8 @@
 package com.example.hotelmanagmentsystem.repository;
 
 import com.example.hotelmanagmentsystem.model.Reservation;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -35,5 +37,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
      */
     @Query("SELECT MAX(r.id) FROM Reservation r")
     Optional<Integer> findMaxId();
+
+    Reservation findById(Long id);
+
 }
+
 
