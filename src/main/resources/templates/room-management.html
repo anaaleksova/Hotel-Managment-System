@@ -104,8 +104,8 @@
                 <tr th:each="room : ${allRooms}">
                     <td th:text="${room.roomNumber}"></td>
                     <td th:text="${room.floor}"></td>
-                    <td th:text="${room.roomTypeId}"></td>
-                    <td th:text="${room.positionTypeId}"></td>
+                    <td th:text="${room.roomType.name}"></td>
+                    <td th:text="${room.roomPositionType.name}"></td>
                     <td th:text="${room.capacity}"></td>
 <!--                    <td>$<span th:text="${#numbers.formatDecimal(room.price, 0, 2)}"></span></td>-->
                     <td>
@@ -145,7 +145,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize tooltips
+
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl)

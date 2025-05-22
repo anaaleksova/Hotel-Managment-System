@@ -30,7 +30,6 @@ public class CustomUserDetails implements UserDetails {
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
 
         Set<Role> roles = user.getRoles();
-        // Add permissions from roles
         if (roles != null) {
             for (Role role : roles) {
                 if (role.getPermissions() != null) {
@@ -42,7 +41,6 @@ public class CustomUserDetails implements UserDetails {
         }
         Set<Group> groups = user.getGroups();
 
-        // Add permissions from groups
         if (groups != null) {
             for (Group group : groups) {
                 if (group.getPermissions() != null) {
@@ -53,7 +51,6 @@ public class CustomUserDetails implements UserDetails {
             }
         }
 
-        // You can also add the user type as an authority
         authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getUserType()));
 
         return authorities;

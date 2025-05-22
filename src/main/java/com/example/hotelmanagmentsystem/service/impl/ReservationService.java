@@ -1,14 +1,9 @@
-package com.example.hotelmanagmentsystem.service;
+package com.example.hotelmanagmentsystem.service.impl;
 
-import com.example.hotelmanagmentsystem.model.Reservation;
-import com.example.hotelmanagmentsystem.model.RoomAvailability;
-import com.example.hotelmanagmentsystem.repository.ReservationRepository;
-import com.example.hotelmanagmentsystem.repository.RoomAvailabilityRepository;
-import com.example.hotelmanagmentsystem.repository.RoomRepository;
+import com.example.hotelmanagmentsystem.model.*;
+import com.example.hotelmanagmentsystem.repository.*;
+import com.example.hotelmanagmentsystem.service.IReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
-public class ReservationService {
+public class ReservationService implements IReservationService {
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -25,18 +20,22 @@ public class ReservationService {
     private RoomAvailabilityRepository roomAvailabilityRepository;
     @Autowired
     private RoomRepository roomRepository;
+    @Autowired
+    private RoomTypeRepository roomTypeRepository;
+    @Autowired
+    private RoomPositionTypeRepository roomPositionTypeRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     /**
      * Create a new reservation and mark the room as booked in Room_Availability
      */
     @Transactional
     public Reservation createReservation(Reservation reservation) {
-        // Check if the room is available for the selected dates
         Long roomId = reservation.getRoom().getId();
         LocalDate checkIn = reservation.getCheckIn();
         LocalDate checkOut = reservation.getCheckOut();
 
-        // Check for overlapping reservations
         List<Reservation> overlappingReservations = reservationRepository.findOverlappingReservations(
                 roomId, checkIn, checkOut);
 
@@ -44,7 +43,6 @@ public class ReservationService {
             throw new RuntimeException("Room is already booked for the selected dates");
         }
 
-        // Check for overlapping availability entries
         List<RoomAvailability> overlappingAvailabilities = roomAvailabilityRepository.findOverlappingAvailabilities(
                 roomId, checkIn, checkOut);
 
@@ -52,14 +50,11 @@ public class ReservationService {
             throw new RuntimeException("Room is not available for the selected dates");
         }
 
-        // Generate next ID (assuming you're managing IDs manually)
         Integer nextId = reservationRepository.findMaxId().orElse(0) + 1;
         reservation.setId(Long.valueOf(nextId));
 
-        // Save the reservation
         Reservation savedReservation = reservationRepository.save(reservation);
 
-        // Create entry in Room_Availability to mark the room as booked
         Integer nextavailabilityId = roomAvailabilityRepository.findMaxId().orElse(0) + 1;
         RoomAvailability availability = new RoomAvailability();
         availability.setId(nextavailabilityId);
@@ -90,7 +85,6 @@ public class ReservationService {
         reservation.setStatus("Cancelled");
         reservationRepository.save(reservation);
 
-        // Make the room available again by removing the entry from Room_Availability
         Long roomId = reservation.getRoom().getId();
         LocalDate checkIn = reservation.getCheckIn();
         LocalDate checkOut = reservation.getCheckOut();
@@ -111,5 +105,6 @@ public class ReservationService {
     public Reservation getReservationById(Long id) {
         return reservationRepository.findById(id);
     }
+
 
 }

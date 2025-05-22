@@ -2,12 +2,10 @@ package com.example.hotelmanagmentsystem.config;
 
 import com.example.hotelmanagmentsystem.model.CustomUserDetails;
 import com.example.hotelmanagmentsystem.model.User;
-import com.example.hotelmanagmentsystem.service.CustomUserDetailsService;
+import com.example.hotelmanagmentsystem.service.impl.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -27,7 +25,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/login") // your custom login page
+                        .loginPage("/login")
                         .defaultSuccessUrl("/", true)
                         .successHandler((request, response, authentication) -> {
                             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();

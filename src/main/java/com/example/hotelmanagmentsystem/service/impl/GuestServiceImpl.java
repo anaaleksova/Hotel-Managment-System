@@ -1,9 +1,10 @@
-package com.example.hotelmanagmentsystem.service;
+package com.example.hotelmanagmentsystem.service.impl;
 
 import com.example.hotelmanagmentsystem.model.Guest;
 import com.example.hotelmanagmentsystem.model.LoyaltyLevel;
 import com.example.hotelmanagmentsystem.repository.GuestRepository;
 import com.example.hotelmanagmentsystem.repository.LoyaltyLevelRepository;
+import com.example.hotelmanagmentsystem.service.IGuestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Service
-public class GuestService {
+public class GuestServiceImpl implements IGuestService {
 
     @Autowired
     private GuestRepository guestRepository;
@@ -24,11 +25,9 @@ public class GuestService {
      */
     @Transactional
     public Guest findOrCreateGuest(String firstName, String lastName, String email, String phone, String address) {
-        // Try to find an existing guest with this email
         Optional<Guest> existingGuest = guestRepository.findByEmail(email);
 
         if (existingGuest.isPresent()) {
-            // Update the guest details if needed
             Guest guest = existingGuest.get();
             guest.setFirstName(firstName);
             guest.setLastName(lastName);
@@ -38,7 +37,6 @@ public class GuestService {
             }
             return guestRepository.save(guest);
         } else {
-            // Create a new guest
             Guest newGuest = new Guest();
             newGuest.setFirstName(firstName);
             newGuest.setLastName(lastName);
@@ -46,18 +44,14 @@ public class GuestService {
             newGuest.setPhone(phone);
             newGuest.setAddress(address);
 
-            // Set initial loyalty points
             newGuest.setLoyaltyPoints(0);
 
-            // Set initial loyalty level (assuming there's a basic/initial level with ID 1)
             LoyaltyLevel basicLevel = loyaltyLevelRepository.findById(1)
                     .orElseThrow(() -> new RuntimeException("Basic loyalty level not found"));
             newGuest.setLoyaltyLevel(basicLevel);
 
-            // No user association initially
             newGuest.setUser(null);
 
-            // Generate next ID (if you're managing IDs manually)
             Integer nextId = guestRepository.findMaxId().orElse(0) + 1;
             newGuest.setId(nextId);
 
@@ -82,7 +76,6 @@ public class GuestService {
         Integer currentPoints = guest.getLoyaltyPoints() != null ? guest.getLoyaltyPoints() : 0;
         guest.setLoyaltyPoints(currentPoints + points);
 
-        // Check if guest should be upgraded to a new loyalty level
         updateLoyaltyLevelIfNeeded(guest);
 
         return guestRepository.save(guest);
@@ -91,15 +84,14 @@ public class GuestService {
     /**
      * Update guest's loyalty level based on their points
      */
-    private void updateLoyaltyLevelIfNeeded(Guest guest) {
+    public void updateLoyaltyLevelIfNeeded(Guest guest) {
         Integer points = guest.getLoyaltyPoints();
         if (points == null) {
             return;
         }
 
-        // Find the appropriate loyalty level based on points
         LoyaltyLevel appropriateLevel = loyaltyLevelRepository.findAppropriateLevel(points)
-                .orElse(guest.getLoyaltyLevel()); // Keep current level if no appropriate level found
+                .orElse(guest.getLoyaltyLevel());
 
         guest.setLoyaltyLevel(appropriateLevel);
     }

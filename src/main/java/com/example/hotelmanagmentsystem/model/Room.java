@@ -40,10 +40,12 @@ public class Room {
     @Column(name = "reserved")
     private Boolean reserved;
 
-    @Column(name = "room_type_id")
-    private Long roomTypeId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "room_type_id", nullable = false)
+    private RoomType roomType;
 
-    @Column(name = "position_type_id")
-    private Long positionTypeId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "position_type_id", nullable = false)
+    private RoomPositionType roomPositionType;
 
 }

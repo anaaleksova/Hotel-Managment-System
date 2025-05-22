@@ -1,4 +1,4 @@
-package com.example.hotelmanagmentsystem.service;
+package com.example.hotelmanagmentsystem.service.impl;
 
 import com.example.hotelmanagmentsystem.dto.UserRegistrationDto;
 import com.example.hotelmanagmentsystem.model.Group;
@@ -9,6 +9,7 @@ import com.example.hotelmanagmentsystem.model.exceptions.UsernameAlreadyExistsEx
 import com.example.hotelmanagmentsystem.repository.GroupRepository;
 import com.example.hotelmanagmentsystem.repository.RoleRepository;
 import com.example.hotelmanagmentsystem.repository.UserRepository;
+import com.example.hotelmanagmentsystem.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Service
-public class UserService {
+public class UserService implements IUserService {
 
     @Autowired
     private UserRepository userRepository;
@@ -33,7 +34,6 @@ public class UserService {
 
     @Transactional
     public User registerNewUser(UserRegistrationDto registrationDto) {
-        // Check if username or email already exists
         if (userRepository.existsByUsername(registrationDto.getUsername())) {
             throw new UsernameAlreadyExistsException("Username already exists");
         }
@@ -41,7 +41,6 @@ public class UserService {
             throw new EmailAlreadyExistsException("Email already exists");
         }
 
-        // Create new user
         User user = new User();
         user.setId((int) (Math.random()*10));
         user.setUsername(registrationDto.getUsername());
@@ -51,16 +50,13 @@ public class UserService {
         user.setActive(true);
         user.setLastName(registrationDto.getLastName());
         user.setPhone(registrationDto.getPhone());
-        user.setUserType("G"); // All new registrations are guests
+        user.setUserType("G");
 
-        // Assign GUEST role
         user = userRepository.save(user);
 
-        // Assign GUEST role
         Role guestRole = roleRepository.findByName("GUEST");
         user.addRole(guestRole);
 
-        // Assign to CUSTOMERS group
         Group customersGroup = groupRepository.findByName("CUSTOMERS");
         user.addGroup(customersGroup);
 

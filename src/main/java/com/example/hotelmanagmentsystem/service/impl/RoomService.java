@@ -1,8 +1,9 @@
-package com.example.hotelmanagmentsystem.service;
+package com.example.hotelmanagmentsystem.service.impl;
 
 import com.example.hotelmanagmentsystem.dto.AvailableRoomDto;
 import com.example.hotelmanagmentsystem.model.*;
 import com.example.hotelmanagmentsystem.repository.*;
+import com.example.hotelmanagmentsystem.service.IRoomService;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class RoomService {
+public class RoomService implements IRoomService {
 
     @Autowired
     private RoomRepository roomRepository;
@@ -37,31 +38,26 @@ public class RoomService {
      * Find available rooms for the given date range and return them with pricing information
      */
     public List<AvailableRoomDto> findAvailableRooms(LocalDate dateFrom, LocalDate dateTo) {
-        // First, find all rooms that are available for the date range
         List<Room> availableRooms = roomRepository.findAvailableRoomsForDateRange(dateFrom, dateTo);
         List<AvailableRoomDto> result = new ArrayList<>();
 
-        // Find the season for the check-in date (we'll use this for pricing)
         Season season = seasonRepository.findByDate(dateFrom);
 
         if (season == null) {
             throw new RuntimeException("No season found for the given date range");
         }
 
-        // For each available room, find its price and other details
         for (Room room : availableRooms) {
-            // Get room type and position
-            Optional<RoomType> roomTypeOpt = roomTypeRepository.findById(room.getRoomTypeId());
-            Optional<RoomPositionType> positionTypeOpt = roomPositionTypeRepository.findById(room.getPositionTypeId());
+            Optional<RoomType> roomTypeOpt = roomTypeRepository.findById(room.getRoomType().getId());
+            Optional<RoomPositionType> positionTypeOpt = roomPositionTypeRepository.findById(room.getRoomPositionType().getId());
 
             if (!roomTypeOpt.isPresent() || !positionTypeOpt.isPresent()) {
-                continue; // Skip rooms without type or position information
+                continue;
             }
 
             RoomType roomType = roomTypeOpt.get();
             RoomPositionType positionType = positionTypeOpt.get();
 
-            // Find the price list for this room type, position, and season
             PriceList priceList = priceListRepository.findByRoomTypeAndPositionTypeAndSeason(
                     roomType.getId(),
                     positionType.getId(),
@@ -69,10 +65,9 @@ public class RoomService {
             );
 
             if (priceList == null) {
-                continue; // Skip rooms without pricing information
+                continue;
             }
 
-            // Create an AvailableRoomDto with all the information
             AvailableRoomDto dto = new AvailableRoomDto();
             dto.setRoomId(room.getId());
             dto.setRoomNumber(room.getRoomNumber());
@@ -94,7 +89,6 @@ public class RoomService {
     }
 
     public AvailableRoomDto getRoomDetails(Long roomId, LocalDate checkInDate) {
-        // Step 1: Find the room
         Optional<Room> roomOpt = roomRepository.findById(roomId);
         if (roomOpt.isEmpty()) {
             return null;
@@ -102,9 +96,8 @@ public class RoomService {
 
         Room room = roomOpt.get();
 
-        // Step 2: Find room type and position
-        Optional<RoomType> roomTypeOpt = roomTypeRepository.findById(room.getRoomTypeId());
-        Optional<RoomPositionType> positionTypeOpt = roomPositionTypeRepository.findById(room.getPositionTypeId());
+        Optional<RoomType> roomTypeOpt = roomTypeRepository.findById(room.getRoomType().getId());
+        Optional<RoomPositionType> positionTypeOpt = roomPositionTypeRepository.findById(room.getRoomPositionType().getId());
 
         if (roomTypeOpt.isEmpty() || positionTypeOpt.isEmpty()) {
             return null;
@@ -113,13 +106,11 @@ public class RoomService {
         RoomType roomType = roomTypeOpt.get();
         RoomPositionType positionType = positionTypeOpt.get();
 
-        // Step 3: Find the season for the CHECK-IN DATE (not today's date)
         Season season = seasonRepository.findByDate(checkInDate);
         if (season == null) {
             return null;
         }
 
-        // Step 4: Find the price list for this combination
         PriceList priceList = priceListRepository.findByRoomTypeAndPositionTypeAndSeason(
                 roomType.getId(),
                 positionType.getId(),
@@ -130,7 +121,6 @@ public class RoomService {
             return null;
         }
 
-        // Step 5: Create and return the DTO
         AvailableRoomDto dto = new AvailableRoomDto();
         dto.setRoomId(room.getId());
         dto.setRoomNumber(room.getRoomNumber());
@@ -155,28 +145,25 @@ public class RoomService {
     /**
      * Helper method to find a RoomPrice for a specific room and date
      */
-    private Optional<RoomPrice> findRoomPriceForDates(Long roomId, LocalDate date) {
-        // Find the season for the date
+    public Optional<RoomPrice> findRoomPriceForDates(Long roomId, LocalDate date) {
         Season season = seasonRepository.findByDate(date);
         if (season == null) {
             return Optional.empty();
         }
 
-        // Get the room
         Optional<Room> roomOpt = roomRepository.findById(roomId);
         if (!roomOpt.isPresent()) {
             return Optional.empty();
         }
 
         Room room = roomOpt.get();
-        RoomType roomType = roomTypeRepository.findById(room.getRoomTypeId()).orElse(null);
-        RoomPositionType positionType =  roomPositionTypeRepository.findById(room.getPositionTypeId()).orElse(null);
+        RoomType roomType = roomTypeRepository.findById(room.getRoomType().getId()).orElse(null);
+        RoomPositionType positionType =  roomPositionTypeRepository.findById(room.getRoomPositionType().getId()).orElse(null);
 
         if (roomType == null || positionType == null) {
             return Optional.empty();
         }
 
-        // Find a matching price list
         PriceList priceList = priceListRepository.findByRoomTypeAndPositionTypeAndSeason(
                 roomType.getId(),
                 positionType.getId(),
@@ -187,16 +174,11 @@ public class RoomService {
             return Optional.empty();
         }
 
-        // Find the RoomPrice entry
         return roomPriceRepository.findByRoomIdAndPriceListId(roomId, priceList.getId());
     }
 
     public List<Room> getAllRooms() {
         return roomRepository.findAll();
-    }
-
-    public void saveRoom(Room room) {
-
     }
 
     public Room getRoomById(Long id) {

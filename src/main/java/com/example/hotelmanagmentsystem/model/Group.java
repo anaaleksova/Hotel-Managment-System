@@ -30,7 +30,6 @@ public class Group {
     )
     private Set<Permission> permissions = new HashSet<>();
 
-    // Add this method
     public Set<Permission> getPermissions() {
         return permissions;
     }

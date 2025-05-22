@@ -1,4 +1,4 @@
-package com.example.hotelmanagmentsystem.service;
+package com.example.hotelmanagmentsystem.service.impl;
 
 import com.example.hotelmanagmentsystem.model.*;
 import com.example.hotelmanagmentsystem.repository.RoleRepository;
@@ -44,17 +44,13 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     private UserDetails buildUserDetails(User user) {
-        // Get user permissions from roles
         Set<GrantedAuthority> authorities = new HashSet<>();
-
-        // Add permissions from User's roles
         for (Role role : user.getRoles()) {
             for (Permission permission : role.getPermissions()) {
                 authorities.add(new SimpleGrantedAuthority(permission.getName()));
             }
         }
 
-        // Add permissions from User's groups
         for (Group group : user.getGroups()) {
             for (Permission permission : group.getPermissions()) {
                 authorities.add(new SimpleGrantedAuthority(permission.getName()));
@@ -65,9 +61,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                 user.getUsername(),
                 user.getPassword(),
                 user.getActive(),
-                true, // account not expired
-                true, // credentials not expired
-                true, // account not locked
+                true,
+                true,
+                true,
                 authorities
         );
     }
